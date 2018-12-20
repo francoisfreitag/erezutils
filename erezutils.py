@@ -11,7 +11,7 @@ def rupdate(d, u):
     return d
 
 
-def hashfiles(fps, algorithm='sha512'):
+def hashfiles(fps, algorithm="sha512"):
     h = hashlib.new(algorithm)
     for fp in fps:
         h.update(fp.read())
@@ -20,4 +20,4 @@ def hashfiles(fps, algorithm='sha512'):
 
 def chunks(lst, n):
     """Yield successive n-sized iterators from list lst."""
-    return (lst[i:(i + n)] for i in range(0, len(lst), n))
+    return (lst[i : (i + n)] for i in range(0, len(lst), n))
