@@ -5,7 +5,7 @@ import hashlib
 def rupdate(d, u):
     """Recursively update dictionary d with the contents of u."""
     for k, v in u.items():
-        if isinstance(v, collections.Mapping):
+        if isinstance(v, collections.abc.Mapping):
             v = rupdate(d.get(k, {}), v)
         d[k] = v
     return d
