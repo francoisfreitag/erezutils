@@ -1,8 +1,11 @@
 import hashlib
 import io
 import unittest
+import uuid
 
-from erezutils import chunks, hashfiles, rupdate
+import boto3
+from erezutils import chunks, delete_from_s3, hashfiles, list_s3_bucket_keys, \
+    rupdate
 
 
 class RecursiveUpdateTest(unittest.TestCase):
@@ -87,3 +90,53 @@ class ChunksTest(unittest.TestCase):
     def test_chunk_group_2(self):
         data = [1, 2, 3, 4]
         self.assertEqual([[1, 2], [3, 4]], list(chunks(data, 2)))
+
+
+class S3OperationsTest(unittest.TestCase):
+    # Prevent conflicts between concurrent test runs.
+    BUCKET = "travisci-test-bucket"
+    PREFIX = str(uuid.uuid4())
+
+    def setUp(self):
+        super(S3OperationsTest, self).setUp()
+        self.s3_client = boto3.client("s3")
+
+    def tearDown(self):
+        remaining_keys = self.list_keys()
+        delete_from_s3(self.s3_client, self.BUCKET, remaining_keys)
+        super(S3OperationsTest, self).tearDown()
+
+    def make_key(self, filename):
+        return self.PREFIX + filename
+
+    def create_file(self, filename):
+        key = self.make_key(filename)
+        self.s3_client.put_object(Bucket=self.BUCKET, Key=key)
+
+    def list_keys(self):
+        return list_s3_bucket_keys(
+            self.s3_client,
+            self.BUCKET,
+            Prefix=self.PREFIX,
+        )
+
+    def test_list_file(self):
+        filename = "a_file"
+        self.create_file(filename)
+        self.assertEqual([self.make_key(filename)], self.list_keys())
+
+    def test_list_nested_files(self):
+        file1 = "dir1/f1"
+        file2 = "dir2/f1"
+        self.create_file(file1)
+        self.create_file(file2)
+        self.assertEqual(
+            [self.make_key(file1), self.make_key(file2)],
+            self.list_keys(),
+        )
+
+    def test_clean_files(self):
+        filename = "a_file"
+        self.create_file(filename)
+        delete_from_s3(self.s3_client, self.BUCKET, [self.make_key(filename)])
+        self.assertEqual([], self.list_keys())

@@ -2,8 +2,11 @@ from setuptools import setup
 
 setup(
     name='erezutils',
-    version='1.0.0',
+    version='1.1.0',
     py_modules=['erezutils'],
+    install_requires=[
+        "boto3",
+    ],
     license='MIT',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
