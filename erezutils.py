@@ -1,11 +1,15 @@
-import collections
+try:
+    from collections.abc import Mapping
+except ImportError:
+    # Python 2.7
+    from collections import Mapping
 import hashlib
 
 
 def rupdate(d, u):
     """Recursively update dictionary d with the contents of u."""
     for k, v in u.items():
-        if isinstance(v, collections.abc.Mapping):
+        if isinstance(v, Mapping):
             v = rupdate(d.get(k, {}), v)
         d[k] = v
     return d
