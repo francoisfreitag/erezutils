@@ -5,8 +5,7 @@ import uuid
 
 import boto3
 from botocore.exceptions import NoCredentialsError
-from erezutils import chunks, delete_from_s3, hashfiles, list_s3_bucket_keys, \
-    rupdate
+from erezutils import chunks, delete_from_s3, hashfiles, list_s3_bucket_keys, rupdate
 
 BUCKET = "travisci-test-bucket"
 
@@ -25,24 +24,19 @@ class RecursiveUpdateTest(unittest.TestCase):
         self.assertEqual({"a": 2, "b": 1}, rupdate({"a": 1, "b": 1}, {"a": 2}))
 
     def test_recursive_update(self):
-        self.assertEqual({
-            "a": {"b": 2}},
-            rupdate({"a": {"b": 1}}, {"a": {"b": 2}})
-        )
+        self.assertEqual({"a": {"b": 2}}, rupdate({"a": {"b": 1}}, {"a": {"b": 2}}))
 
     def test_recursive_update_on_empty_dict(self):
         self.assertEqual({"a": {"b": 2}}, rupdate({}, {"a": {"b": 2}}))
 
     def test_recursive_update_with_other_keys(self):
         self.assertEqual(
-            {"a": {"b": 2, "c": 1}},
-            rupdate({"a": {"b": 1}}, {"a": {"b": 2, "c": 1}})
+            {"a": {"b": 2, "c": 1}}, rupdate({"a": {"b": 1}}, {"a": {"b": 2, "c": 1}})
         )
 
     def test_recursive_update_leaves_other_keys_untouched(self):
         self.assertEqual(
-            {"a": {"b": 2, "c": 1}},
-            rupdate({"a": {"b": 1, "c": 1}}, {"a": {"b": 2}})
+            {"a": {"b": 2, "c": 1}}, rupdate({"a": {"b": 1, "c": 1}}, {"a": {"b": 2}})
         )
 
 
@@ -61,9 +55,7 @@ class HashfilesTest(unittest.TestCase):
         data_sha256.update(data)
 
         f = io.BytesIO(data)
-        self.assertEqual(
-            data_sha256.hexdigest(), hashfiles([f], algorithm="sha256")
-        )
+        self.assertEqual(data_sha256.hexdigest(), hashfiles([f], algorithm="sha256"))
 
     def test_hash_multiple_files(self):
         data1 = b"thisisatest"
@@ -108,8 +100,7 @@ def test_bucket_access():
 
 # https://docs.travis-ci.com/user/pull-requests/#pull-requests-and-security-restrictions
 @unittest.skipIf(
-    test_bucket_access(),
-    "Access to AWS credentials forbidden on pull requests",
+    test_bucket_access(), "Access to AWS credentials forbidden on pull requests"
 )
 class S3OperationsTest(unittest.TestCase):
     # Prevent conflicts between concurrent test runs.
@@ -144,10 +135,7 @@ class S3OperationsTest(unittest.TestCase):
         file2 = "dir2/f1"
         self.create_file(file1)
         self.create_file(file2)
-        self.assertEqual(
-            [self.make_key(file1), self.make_key(file2)],
-            self.list_keys(),
-        )
+        self.assertEqual([self.make_key(file1), self.make_key(file2)], self.list_keys())
 
     def test_clean_files(self):
         filename = "a_file"
