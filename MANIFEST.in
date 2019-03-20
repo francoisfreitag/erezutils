@@ -1,2 +1,4 @@
 include LICENSE
 include README.md
+include test_erezutils.py
+include tox.ini
