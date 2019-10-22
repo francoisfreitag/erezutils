@@ -107,13 +107,13 @@ class S3OperationsTest(unittest.TestCase):
     PREFIX = str(uuid.uuid4())
 
     def setUp(self):
-        super(S3OperationsTest, self).setUp()
+        super().setUp()
         self.s3_client = boto3.client("s3")
 
     def tearDown(self):
         remaining_keys = self.list_keys()
         delete_from_s3(self.s3_client, BUCKET, remaining_keys)
-        super(S3OperationsTest, self).tearDown()
+        super().tearDown()
 
     def make_key(self, filename):
         return self.PREFIX + filename
