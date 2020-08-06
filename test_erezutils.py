@@ -5,6 +5,7 @@ import uuid
 
 import boto3
 from botocore.exceptions import NoCredentialsError
+
 from erezutils import chunks, delete_from_s3, hashfiles, list_s3_bucket_keys, rupdate
 
 BUCKET = "travisci-test-bucket"
