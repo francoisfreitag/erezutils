@@ -1,3 +1,5 @@
+import contextlib
+import tempfile
 from collections.abc import Mapping
 
 
@@ -31,3 +33,24 @@ def list_s3_bucket_keys(client, bucket, **kwargs):
         if "Contents" in page:
             keys.extend(object["Key"] for object in page["Contents"])
     return keys
+
+
+def pgpass_escape(s):
+    return s.replace("\\", "\\\\").replace(":", "\\:").replace("*", "\\*")
+
+
+@contextlib.contextmanager
+def pgpass(configs):
+    with tempfile.NamedTemporaryFile("w") as f:
+        for config in configs:
+            f.write(
+                "%s:*:%s:%s:%s\n"
+                % (
+                    pgpass_escape(config["host"]),
+                    pgpass_escape(config["name"]),
+                    pgpass_escape(config["user"]),
+                    pgpass_escape(config["password"]),
+                )
+            )
+        f.flush()
+        yield f.name

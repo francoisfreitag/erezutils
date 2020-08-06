@@ -1,10 +1,19 @@
+import os
 import unittest
 import uuid
+from pathlib import Path
 
 import boto3
 from botocore.exceptions import NoCredentialsError
 
-from erezutils import chunks, delete_from_s3, list_s3_bucket_keys, rupdate
+from erezutils import (
+    chunks,
+    delete_from_s3,
+    list_s3_bucket_keys,
+    pgpass,
+    pgpass_escape,
+    rupdate,
+)
 
 BUCKET = "travisci-test-bucket"
 
@@ -112,3 +121,43 @@ class S3OperationsTest(unittest.TestCase):
         self.create_file(filename)
         delete_from_s3(self.s3_client, BUCKET, [self.make_key(filename)])
         self.assertEqual([], self.list_keys())
+
+
+class PGPassEscapeTest(unittest.TestCase):
+    def test_escape(self):
+        cases = [
+            ("abc123", "abc123"),
+            ("abc:123", "abc\\:123"),
+            ("abc*123", "abc\\*123"),
+            ("abc\\123", "abc\\\\123"),
+            ("abc:*\\123", "abc\\:\\*\\\\123"),
+        ]
+        for value, expected in cases:
+            with self.subTest(value):
+                self.assertEqual(expected, pgpass_escape(value))
+
+
+class PGPassTest(unittest.TestCase):
+    def test_context_manager(self):
+        configs = [
+            {
+                "name": "db1",
+                "user": "admin1",
+                "password": "hunter2",
+                "host": "localhost",
+            },
+            {
+                "name": "db2",
+                "user": "admin2",
+                "password": "hunter:2",
+                "host": "localhost",
+            },
+        ]
+        with pgpass(configs) as path:
+            content = Path(path).read_bytes()
+            self.assertEqual(
+                b"localhost:*:db1:admin1:hunter2\n"
+                b"localhost:*:db2:admin2:hunter\\:2\n",
+                content,
+            )
+        self.assertFalse(os.path.exists(path))
