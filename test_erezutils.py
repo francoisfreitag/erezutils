@@ -1,12 +1,10 @@
-import hashlib
-import io
 import unittest
 import uuid
 
 import boto3
 from botocore.exceptions import NoCredentialsError
 
-from erezutils import chunks, delete_from_s3, hashfiles, list_s3_bucket_keys, rupdate
+from erezutils import chunks, delete_from_s3, list_s3_bucket_keys, rupdate
 
 BUCKET = "travisci-test-bucket"
 
@@ -39,35 +37,6 @@ class RecursiveUpdateTest(unittest.TestCase):
         self.assertEqual(
             {"a": {"b": 2, "c": 1}}, rupdate({"a": {"b": 1, "c": 1}}, {"a": {"b": 2}})
         )
-
-
-class HashfilesTest(unittest.TestCase):
-    def test_hash_default_sha512(self):
-        data = b"thisisatest"
-        data_sha512 = hashlib.sha512()
-        data_sha512.update(data)
-
-        f = io.BytesIO(data)
-        self.assertEqual(data_sha512.hexdigest(), hashfiles([f]))
-
-    def test_hash_sha256(self):
-        data = b"thisisatest"
-        data_sha256 = hashlib.sha256()
-        data_sha256.update(data)
-
-        f = io.BytesIO(data)
-        self.assertEqual(data_sha256.hexdigest(), hashfiles([f], algorithm="sha256"))
-
-    def test_hash_multiple_files(self):
-        data1 = b"thisisatest"
-        data2 = b"andanothertest"
-        data_sha512 = hashlib.sha512()
-        data_sha512.update(data1)
-        data_sha512.update(data2)
-
-        f1 = io.BytesIO(data1)
-        f2 = io.BytesIO(data2)
-        self.assertEqual(data_sha512.hexdigest(), hashfiles([f1, f2]))
 
 
 class ChunksTest(unittest.TestCase):

@@ -1,4 +1,3 @@
-import hashlib
 from collections.abc import Mapping
 
 
@@ -9,13 +8,6 @@ def rupdate(d, u):
             v = rupdate(d.get(k, {}), v)
         d[k] = v
     return d
-
-
-def hashfiles(fps, algorithm="sha512"):
-    h = hashlib.new(algorithm)
-    for fp in fps:
-        h.update(fp.read())
-    return h.hexdigest()
 
 
 def chunks(lst, n):
